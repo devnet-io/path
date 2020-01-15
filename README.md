@@ -6,6 +6,7 @@ Path is a simple java utility for providing strongly typed referces to nested me
 - [Basic Usage](#basic-usage)
   - [With Methods](#using-methods)
   - [With Fields](#using-fields)
+  - [Output](#output)
 - [Use Cases](#use-cases)
   - [Database Queries](#strongly-typed-database-queries-using-criteria)
 - [Implementation](#implementation)
@@ -62,10 +63,43 @@ System.out.println(path); // artist.genere.name
 Shorthand syntax (max depth 5)
 
 ```java
-String path = Path.for(a -> a.artist, a -> a.genre, g -> genre.name).resolve();
+String path = Path.for(a -> a.artist, a -> a.genre, g -> g.name).resolve();
   
 System.out.println(path); // artist.genere.name
 ```
+
+### Output 
+
+Create the path chain
+
+```java 
+Path path = Path.for(Album.class).$(Album::getArtist).$(Artist::getGenere);
+```
+Return a string representation of the chain
+```java 
+String fieldPath = path.resolve(); // "artist.genere.name"
+
+// include the parent in the path
+String fullPath = path.resolve(Path.RESOLVE_PARENT); // "album.artist.genre.name"
+
+```
+Return a java.lang.reflect object for the last method in the chain. Throws MethodNotFound exception if the chain is built with fields.
+```java 
+Method method = path.lastMethod(); // getGenere()
+```
+
+Return the type of the last field in the chain
+```java 
+Class<?> field = path.lastField(); // String.class, return type of getGenere()
+```
+
+Retrieve the value for the last field in the chain by passing an instance of the parent class. The getters will be invoked if they are present in the chain. 
+```java 
+Album album = myService.getAlbum();
+
+String value = path.evaluate(album); // "synthwave", return of the last method in the chain: getGenere()
+```
+
 ## Use cases
 ### Strongly typed database queries using criteria
 
