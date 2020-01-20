@@ -1,6 +1,8 @@
 # path
 
-Path is a simple java utility for providing strongly typed referces to nested methods and fields.
+Path is a simple java utility for providing strongly typed references to nested methods and fields. 
+It uses a convienent java 8 syntax for reflection, evaluation, and assertion. 
+Path builds on Jodd's excellent (and very fast) [Proxetta](https://jodd.org/proxetta/) library.
 
 - [Getting Started](#getting-started)
 - [Basic Usage](#basic-usage)
@@ -8,6 +10,8 @@ Path is a simple java utility for providing strongly typed referces to nested me
   - [With Fields](#using-fields)
   - [Output](#output)
 - [Use Cases](#use-cases)
+  - [Strongly Typed Reflection](#strongly-typed-reflection)
+  - [Validation](#validation)
   - [Database Queries](#strongly-typed-database-queries-using-criteria)
 - [Implementation](#implementation)
 - [Licensing](#licensing)
@@ -18,8 +22,8 @@ Add the following dependency to your maven project. Gradle and others are also s
 
 ```xml
 <dependency>
-  <groupId>io.devnet.utils</groupId>
-  <artifactId>utils-path</artifactId>
+  <groupId>io.devnet.util</groupId>
+  <artifactId>util-path</artifactId>
   <version>0.5.0</version>
 </dependency>
 ```
@@ -36,7 +40,7 @@ String path = Path.for(Album.class)
   .$(Genre::getName)
   .resolve();
   
-System.out.println(path); // artist.genere.name
+System.out.println(path); genre
 ```
 
 Shorthand syntax (max depth 5)
@@ -101,9 +105,15 @@ String value = path.evaluate(album); // "synthwave", return of the last method i
 ```
 
 ## Use cases
+
+### Strongly typed reflection
+
+### Validation
+
+
 ### Strongly typed database queries using criteria
 
-This syntax allows implementations to both enfoce the paths used in joins are correct and ensure that the input passed to the criteria is of the right type.
+This syntax allows implementations to both enforce the paths used in joins are correct and ensure that the input passed to the criteria is of the right type.
 
 In this example Employee must have a method named getDepartment, department must have a method named getName, and
 departmentName of the same type as Department$getName's return type.
@@ -131,7 +141,7 @@ SearchCriteria<Employee> criteriaTwo = SearchCriteria.for(Employee.class)
 SearchResult<Employee> result = searchService.find(criteriaOne)
 ```
 
-A classic implmentaiton may appear as follows. Here we do not know if the entity fields are and input types are valid until runtime. 
+A classic implementation may appear as follows. Here we do not know if the entities fields are and input types are valid until runtime. 
 
 ```java
 String departmentName = "accounting";
