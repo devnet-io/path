@@ -8,9 +8,9 @@ import java.util.List;
 public class Artist {
     private String name;
     private List<Album> albums;
-    private Genre genre;
+    public Genre genre;
 
-    public String getDog(String name) {
-        return "doggo: " + name;
+    public Genre getDog(String name) {
+        return this.getGenre();
     }
 }

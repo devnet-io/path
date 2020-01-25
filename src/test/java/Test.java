@@ -4,6 +4,8 @@ import entities.Genre;
 import io.devnet.util.path.Path;
 import jodd.pathref.Pathref;
 
+import java.lang.annotation.Annotation;
+import java.util.List;
 import java.util.Objects;
 
 public class Test {
@@ -16,17 +18,21 @@ public class Test {
         Artist ar = new Artist();
 
         Genre g = new Genre();
-        g.setName(null);
+        g.setName("Barth");
 
         ar.setGenre(g);
         a.setArtist(ar);
 
-        Path<Album, String> s = Path.of(Album.class)
-                .$(Album::getArtist)
+        Class<Album> c = (Class<Album>) new Object().getClass();
+
+        Path<Album, String> s = Path.of(a)
+                .$(Album::getArtist) // for each one we decide if its a field or a method and push. that choice is used when evauating but otherwise only the last in teh the chain matters
                 .$(Artist::getGenre)
                 .$(Genre::getName);
 
         System.err.println(s.resolve());
+        System.err.println(s.method.exists());
+        System.err.println(s.field.exists(a));
         System.err.println(s.evaluateField(a));
 
         /*String s = Path.of(Album.class)

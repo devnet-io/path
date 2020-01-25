@@ -1,113 +1,76 @@
 package io.devnet.util.path;
 
-import jodd.bean.BeanUtil;
-import jodd.pathref.Pathref;
-import jodd.proxetta.ProxettaException;
-
-import java.util.function.BiFunction;
-import java.util.function.Function;
+import io.devnet.util.path.reflect.IFieldOperations;
+import io.devnet.util.path.reflect.IMethodOperations;
+import io.devnet.util.path.IOperatorContexts.OperationContext;
 
 /**
  * @author Joe Esposito <joe@devnet.io>
  */
 
-public class Path<RootType, ReturnType> {
-    private enum EvalType { FIELD, METHOD };
+public abstract class Path<RootType, ReturnType> extends CorePath<RootType, ReturnType> {
 
-    private Pathref<ReturnType> currentRef;
-    private Class<ReturnType> clazz;
-    private PathContext context;
-
-    private Path(Class<ReturnType> clazz, PathContext context) {
-        this.clazz = clazz;
-        this.context = context;
-
-        if (clazz != null) {
-            currentRef = Pathref.on(clazz);
-        }
+    protected Path(PathContext<RootType, ReturnType> context) {
+        super(context);
     }
 
-    public <NextReturnType, Arg1> Path<RootType, NextReturnType> $(BiFunction<ReturnType, Arg1, NextReturnType> method, Arg1 arg1) {
-        return $((m) -> method.apply(m, arg1));
-    }
+    public IMethodOperations<RootType, ReturnType> method = new IMethodOperations<RootType, ReturnType>(){
 
-    public boolean assrt(RootType rootType, Object object) {
-        ReturnType result = evaluateField(rootType);
-
-        if (object.getClass().isAssignableFrom(result.getClass())) {
-            return result.equals(object);
+        @Override
+        public String resolve() {
+            return Path.this.resolve();
         }
 
-        return false;
-    }
-
-    public <NextReturnTypeLeft, NextReturnTypeRight> Path<RootType, NextReturnTypeLeft> branch(Function<ReturnType, Boolean> expression, Function<ReturnType, NextReturnTypeLeft> left, Function<ReturnType, NextReturnTypeLeft> right) {
-        if (true) {
-            return $(left);
-        }
-        return $(right);
-    }
-
-    public <NextReturnType> Path<RootType, NextReturnType> $(Function<ReturnType, NextReturnType> method) {
-        ReturnType instance = currentRef.to();
-
-        String newPath = currentRef.path(method.apply(instance));
-
-        Class<NextReturnType> returnType = (Class<NextReturnType>) BeanUtil.forced.getPropertyType(instance, newPath);
-
-        // Class<N> returnType = null;
-
-       /* try {
-            returnType = (Class<N>) clazz.getMethod(newPath).getReturnType();
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
-        }*/
-
-        this.context.pushField(newPath);
-
-        try {
-            return new Path<>(returnType, this.context);
-        } catch (ProxettaException e) {
-            return new Path<>(null, this.context);
-        }
-    }
-
-    public String resolve() {
-        return String.join(".", this.context.fieldNames);
-    }
-
-    public ReturnType evaluateField(RootType rootInstance) {
-        return evaluateField(rootInstance, null);
-    }
-    public ReturnType evaluateField(RootType rootInstance, ReturnType defaultValue) {
-        return evaluate(EvalType.FIELD, rootInstance, null);
-    }
-
-    public ReturnType evaluateMethod(RootType rootInstance) {
-        return evaluateMethod(rootInstance, null);
-    }
-
-    public ReturnType evaluateMethod(RootType rootInstance, ReturnType defaultValue) {
-        return evaluate(EvalType.METHOD, rootInstance, null);
-    }
-
-    private ReturnType evaluate(EvalType type, RootType rootInstance, ReturnType defaultValue) {
-        ReturnType result = BeanUtil.forced.getProperty(rootInstance, resolve());
-
-        if (result != null) {
-            return result;
+        @Override
+        public PathContext<RootType, ReturnType> getContext() {
+            return Path.this.getContext();
         }
 
-        return defaultValue;
+        public OperationContext getOperatorContext() {
+            return IOperatorContexts.OperationContext.METHOD;
+        }
+
+    }; // only class available in root
+
+    public IFieldOperations<RootType, ReturnType> field = new IFieldOperations<RootType, ReturnType>(){
+
+        @Override
+        public String resolve() {
+            return Path.this.resolve();
+        }
+
+        @Override
+        public PathContext<RootType, ReturnType> getContext() {
+            return Path.this.getContext();
+        }
+
+        public OperationContext getOperatorContext() {
+            return IOperatorContexts.OperationContext.FIELD;
+        }
+
+    }; // only class available in root
+
+    public static <T> RootPath<T, T> of(Class<T> in) {
+        PathContext<T, T> context = new PathContext<>(in);
+
+        return new RootPath<T, T>(context) {
+            @Override
+            public OperationContext getOperatorContext() {
+                return OperationContext.CLASS;
+            }
+        };
     }
 
-    public static <T> Path<T, T> of(Class<T> in) {
-        return new Path<>(in, new PathContext());
-    }
+    public static <T> RootPath<T, T> of(T instance) {
+        PathContext<T, T> context = new PathContext<>(instance.getClass());
+        context.setRootInstance(instance);
 
-    public static <T> Path<T, T> of(T instance) {
-        return new Path<T, T>((Class<T>) instance.getClass(), new PathContext());
+        return new RootPath<T, T>(context) {
+            @Override
+            public OperationContext getOperatorContext() {
+                return OperationContext.CLASS;
+            }
+        };
     }
-
 }
 
