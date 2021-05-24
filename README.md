@@ -1,3 +1,5 @@
+!> Note: this library is under active development, breaking changes may occur
+
 # path
 
 Path is a simple java utility for providing strongly typed references to nested methods and fields. 

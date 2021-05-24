@@ -49,33 +49,23 @@ public abstract class CorePath<RootType, ReturnType> implements ICoreInterface<R
         Methref<ReturnType> methref = null;
 
         try {
-
             try {
-
                 pathRef = Pathref.on(context.clazz);
-
             } catch (ProxettaException e) {
-
                 methref = Methref.on(context.clazz);
-
             }
-
 
             ReturnType pathInstance = null;
             String newPath = null;
 
             if(pathRef != null) {
-
                 pathInstance = pathRef.to();
                 newPath = pathRef.path(method.apply(pathInstance));
-
             }
 
             if(newPath == null && methref != null) {
-
                 pathInstance = methref.to();
                 newPath = methref.ref(method.apply(pathInstance));
-
             }
 
             Class<NextReturnType> returnType = (Class<NextReturnType>) BeanUtil.forced.getPropertyType(pathInstance, newPath);

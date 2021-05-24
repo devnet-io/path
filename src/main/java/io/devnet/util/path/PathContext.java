@@ -13,9 +13,11 @@ public class PathContext<RootType, ReturnType> {
     private List<String> fieldNames = new ArrayList<>();
     private OperationContext resolveMode;
     private RootType rootInstance;
+    public Class<ReturnType> clazz; // temp
 
-    public <N> PathContext(Class<N> pppppusssy) {
-        this.clazz = (Class<RootType>) pppppusssy;
+    public <N> PathContext(Class<RootType> input) {
+        this.clazz = (Class<RootType>) input;
+
         try {
             rootInstance = (RootType) clazz.newInstance();
         } catch (InstantiationException e) {
@@ -24,8 +26,6 @@ public class PathContext<RootType, ReturnType> {
             e.printStackTrace();
         }
     }
-
-    public Class<ReturnType> clazz; // temp
 
     public void pushField(String fieldName) {
         this.fieldNames.add(fieldName);
@@ -55,7 +55,5 @@ public class PathContext<RootType, ReturnType> {
 
     private Set<PathSegment> segments;
 
-    public <R> process(Reducer<PathSegment> reducer...) {
-        dog
-    }
+    //public <R> process(Reducer<PathSegment> reducer...) {}
 }

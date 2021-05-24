@@ -15,8 +15,6 @@ import java.util.List;
 public interface IAnnotationOperations<RootType, ReturnType> extends ICoreInterface<RootType, ReturnType> {
 
     /**
-     * Checks to see if the class
-     *
      * @param annotationClass   The desired annotation class
      * @return                  If the annotation is present at this location in the chain
      */
